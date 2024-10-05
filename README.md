@@ -37,11 +37,6 @@ GROUP BY sales.customer_id
 ORDER BY sales.customer_id ASC; 
 ````
 
-#### Steps:
-- Use **JOIN** to merge `dannys_diner.sales` and `dannys_diner.menu` tables as `sales.customer_id` and `menu.price` are from both tables.
-- Use **SUM** to calculate the total sales contributed by each customer.
-- Group the aggregated results by `sales.customer_id`. 
-
 #### Answer:
 | customer_id | total_sales |
 | ----------- | ----------- |
@@ -65,9 +60,6 @@ FROM dannys_diner.sales
 GROUP BY customer_id;
 ````
 
-#### Steps:
-- To determine the unique number of visits for each customer, utilize **COUNT(DISTINCT `order_date`)**.
-- It's important to apply the **DISTINCT** keyword while calculating the visit count to avoid duplicate counting of days. For instance, if Customer A visited the restaurant twice on '2021–01–07', counting without **DISTINCT** would result in 2 days instead of the accurate count of 1 day.
 
 #### Answer:
 | customer_id | visit_count |
@@ -106,10 +98,6 @@ WHERE rank = 1
 GROUP BY customer_id, product_name;
 ````
 
-#### Steps:
-- Create a Common Table Expression (CTE) named `ordered_sales_cte`. Within the CTE, create a new column `rank` and calculate the row number using **DENSE_RANK()** window function. The **PARTITION BY** clause divides the data by `customer_id`, and the **ORDER BY** clause orders the rows within each partition by `order_date`.
-- In the outer query, select the appropriate columns and apply a filter in the **WHERE** clause to retrieve only the rows where the rank column equals 1, which represents the first row within each `customer_id` partition.
-- Use the GROUP BY clause to group the result by `customer_id` and `product_name`.
 
 #### Answer:
 | customer_id | product_name | 
@@ -123,11 +111,7 @@ GROUP BY customer_id, product_name;
 - Customer B's first order is curry.
 - Customer C's first order is ramen.
 
-I have received feedback suggesting the use of `ROW_NUMBER()` instead of `DENSE_RANK()` for determining the "first order" in this question. 
 
-However, since the `order_date` does not have a timestamp, it is impossible to determine the exact sequence of items ordered by the customer. 
-
-Therefore, it would be inaccurate to conclude that curry is the customer's first order purely based on the alphabetical order of the product names. For this reason, I maintain my solution of using `DENSE_RANK()` and consider both curry and sushi as Customer A's first order.
 
 ***
 
@@ -145,9 +129,6 @@ ORDER BY most_purchased_item DESC
 LIMIT 1;
 ````
 
-#### Steps:
-- Perform a **COUNT** aggregation on the `product_id` column and **ORDER BY** the result in descending order using `most_purchased` field.
-- Apply the **LIMIT** 1 clause to filter and retrieve the highest number of purchased items.
 
 #### Answer:
 | most_purchased | product_name | 
@@ -155,7 +136,7 @@ LIMIT 1;
 | 8       | ramen |
 
 
-- Most purchased item on the menu is ramen which is 8 times. Yummy!
+- Most purchased item on the menu is ramen which is 8 times.
 
 ***
 
@@ -186,11 +167,7 @@ WHERE rank = 1;
 
 *Each user may have more than 1 favourite item.*
 
-#### Steps:
-- Create a CTE named `fav_item_cte` and within the CTE, join the `menu` table and `sales` table using the `product_id` column.
-- Group results by `sales.customer_id` and `menu.product_name` and calculate the count of `menu.product_id` occurrences for each group. 
-- Utilize the **DENSE_RANK()** window function to calculate the ranking of each `sales.customer_id` partition based on the count of orders **COUNT(`sales.customer_id`)** in descending order.
-- In the outer query, select the appropriate columns and apply a filter in the **WHERE** clause to retrieve only the rows where the rank column equals 1, representing the rows with the highest order count for each customer.
+
 
 #### Answer:
 | customer_id | product_name | order_count |
@@ -232,13 +209,6 @@ WHERE row_num = 1
 ORDER BY customer_id ASC;
 ```
 
-#### Steps:
-- Create a CTE named `joined_as_member` and within the CTE, select the appropriate columns and calculate the row number using the **ROW_NUMBER()** window function. The **PARTITION BY** clause divides the data by `members.customer_id` and the **ORDER BY** clause orders the rows within each `members.customer_id` partition by `sales.order_date`.
-- Join tables `dannys_diner.members` and `dannys_diner.sales` on `customer_id` column. Additionally, apply a condition to only include sales that occurred *after* the member's `join_date` (`sales.order_date > members.join_date`).
-- In the outer query, join the `joined_as_member` CTE with the `dannys_diner.menu` on the `product_id` column.
-- In the **WHERE** clause, filter to retrieve only the rows where the row_num column equals 1, representing the first row within each `customer_id` partition.
-- Order result by `customer_id` in ascending order.
-
 #### Answer:
 | customer_id | product_name |
 | ----------- | ---------- |
@@ -276,14 +246,6 @@ WHERE rank = 1
 ORDER BY p_member.customer_id ASC;
 ````
 
-#### Steps:
-- Create a CTE called `purchased_prior_member`. 
-- In the CTE, select the appropriate columns and calculate the rank using the **ROW_NUMBER()** window function. The rank is determined based on the order dates of the sales in descending order within each customer's group.
-- Join `dannys_diner.members` table with `dannys_diner.sales` table based on the `customer_id` column, only including sales that occurred *before* the customer joined as a member (`sales.order_date < members.join_date`).
-- Join `purchased_prior_member` CTE with `dannys_diner.menu` table based on `product_id` column.
-- Filter the result set to include only the rows where the rank is 1, representing the earliest purchase made by each customer before they became a member.
-- Sort the result by `customer_id` in ascending order.
-
 #### Answer:
 | customer_id | product_name |
 | ----------- | ---------- |
@@ -311,12 +273,6 @@ GROUP BY sales.customer_id
 ORDER BY sales.customer_id;
 ```
 
-#### Steps:
-- Select the columns `sales.customer_id` and calculate the count of `sales.product_id` as total_items for each customer and the sum of `menu.price` as total_sales.
-- From `dannys_diner.sales` table, join `dannys_diner.members` table on `customer_id` column, ensuring that `sales.order_date` is earlier than `members.join_date` (`sales.order_date < members.join_date`).
-- Then, join `dannys_diner.menu` table to `dannys_diner.sales` table on `product_id` column.
-- Group the results by `sales.customer_id`.
-- Order the result by `sales.customer_id` in ascending order.
 
 #### Answer:
 | customer_id | total_items | total_sales |
@@ -351,14 +307,6 @@ INNER JOIN points_cte
 GROUP BY sales.customer_id
 ORDER BY sales.customer_id;
 ```
-
-#### Steps:
-Let's break down the question to understand the point calculation for each customer's purchases.
-- Each $1 spent = 10 points. However, `product_id` 1 sushi gets 2x points, so each $1 spent = 20 points.
-- Here's how the calculation is performed using a conditional CASE statement:
-	- If product_id = 1, multiply every $1 by 20 points.
-	- Otherwise, multiply $1 by 10 points.
-- Then, calculate the total points for each customer.
 
 #### Answer:
 | customer_id | total_points | 
@@ -403,21 +351,6 @@ INNER JOIN dannys_diner.menu
   ON sales.product_id = menu.product_id
 GROUP BY sales.customer_id;
 ```
-
-#### Assumptions:
-- On Day -X to Day 1 (the day a customer becomes a member), each $1 spent earns 10 points. However, for sushi, each $1 spent earns 20 points.
-- From Day 1 to Day 7 (the first week of membership), each $1 spent for any items earns 20 points.
-- From Day 8 to the last day of January 2021, each $1 spent earns 10 points. However, sushi continues to earn double the points at 20 points per $1 spent.
-
-#### Steps:
-- Create a CTE called `dates_cte`. 
-- In `dates_cte`, calculate the `valid_date` by adding 6 days to the `join_date` and determine the `last_date` of the month by subtracting 1 day from the last day of January 2021.
-- From `dannys_diner.sales` table, join `dates_cte` on `customer_id` column, ensuring that the `order_date` of the sale is after the `join_date` (`dates.join_date <= sales.order_date`) and not later than the `last_date` (`sales.order_date <= dates.last_date`).
-- Then, join `dannys_diner.menu` table based on the `product_id` column.
-- In the outer query, calculate the points by using a `CASE` statement to determine the points based on our assumptions above. 
-    - If the `product_name` is 'sushi', multiply the price by 2 and then by 10. For orders placed between `join_date` and `valid_date`, also multiply the price by 2 and then by 10. 
-    - For all other products, multiply the price by 10.
-- Calculate the sum of points for each customer.
 
 #### Answer:
 | customer_id | total_points | 
